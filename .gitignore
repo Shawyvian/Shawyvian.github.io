@@ -9,3 +9,5 @@ node_modules/
 .DS_Store
 Thumbs.db
 *.log
+# local config backups
+*.bak-deploy
