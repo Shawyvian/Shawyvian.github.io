@@ -1,0 +1,25 @@
+<div id="header-container" class="header-top">
+  <div class="logo">
+    <a href="<%- url_for('/') %>">
+      <% if (theme.logo) { %>
+      <img src="<%- url_for(theme.logo) %>" alt="<%= theme.title %>" />
+      <% } else { %> <%= theme.title %> <% } %>
+    </a>
+  </div>
+
+  <button class="menu-toggle" aria-label="Toggle Menu" aria-expanded="false">
+    <span class="line line-1"></span>
+    <span class="line line-2"></span>
+    <span class="line line-3"></span>
+  </button>
+
+  <nav class="nav-menu">
+    <ul class="nav-list">
+      <% if (theme.menu) { %> <% for (let i in theme.menu) { %>
+      <li>
+        <a href="<%- url_for(theme.menu[i]) %>"><%= __(`menu.${i}`) %></a>
+      </li>
+      <% } %> <% } %>
+    </ul>
+  </nav>
+</div>

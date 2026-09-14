@@ -1,0 +1,93 @@
+<!-- 头部 -->
+<%- partial('_partial/header',{}, {cache: true}) %>
+
+<!-- D3.js & D3-Sankey plugin CDNs -->
+<script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
+<script src="https://cdn.jsdelivr.net/npm/d3-sankey@0.12"></script>
+
+<!-- Serialize Hexo Posts data for the client side D3 visualization -->
+<script id="posts-data" type="application/json">
+  <%- JSON.stringify(site.posts.sort('date', -1).map(function(post) {
+    return {
+      title: post.title,
+      path: url_for(post.path),
+      date: date(post.date, 'YYYY-MM-DD'),
+      year: date(post.date, 'YYYY'),
+      categories: post.categories && post.categories.length ? post.categories.map(function(cat) { return cat.name; }) : [],
+      tags: post.tags && post.tags.length ? post.tags.map(function(tag) { return tag.name; }) : []
+    };
+  })) %>
+</script>
+
+<!-- Serialize taxonomies URLs for navigation -->
+<script id="taxonomies-data" type="application/json">
+  {
+    "categories": <%- JSON.stringify(site.categories.reduce(function(acc, cat) {
+      acc[cat.name] = url_for(cat.path);
+      return acc;
+    }, {})) %>,
+    "tags": <%- JSON.stringify(site.tags.reduce(function(acc, tag) {
+      acc[tag.name] = url_for(tag.path);
+      return acc;
+    }, {})) %>,
+    "yearBase": "<%- url_for('/archives/') %>"
+  }
+</script>
+
+<script>
+  window.sankeyI18n = {
+    all: "<%= __('stats.all') %>",
+    yearCategory: "<%= __('stats.yearToCategory') %>",
+    categoryTag: "<%= __('stats.categoryToTag') %>",
+    tip: "<%= __('stats.tip') %>",
+    loading: "<%= __('stats.loading') %>",
+    articlesList: "<%= __('post.list') %>",
+    articlesCount: "<%= __('post.count', '%s') %>",
+    noArticles: "<%= __('stats.noArticles') %>",
+    noChartData: "<%= __('stats.noChartData') %>",
+    layoutError: "<%= __('stats.layoutError') %>",
+    flowPath: "<%= __('stats.flowPath') %>",
+    relatedArticles: "<%= __('stats.relatedArticles') %>",
+    archiveYear: "<%= __('stats.archiveYear') %>",
+    articleCategory: "<%= __('stats.articleCategory') %>",
+    tagCategory: "<%= __('stats.tagCategory') %>",
+    containsArticles: "<%= __('stats.containsArticles') %>",
+    clickHint: "<%= __('stats.clickHint') %>"
+  };
+</script>
+
+<div class="tag-index-page page-content">
+  <div class="sankey-archive-container">
+    <!-- 控制栏 -->
+    <div class="sankey-controls">
+      <div class="sankey-tabs">
+        <button class="sankey-tab active" data-view="all"><%= __('stats.all') %></button>
+        <button class="sankey-tab" data-view="year-category"><%= __('stats.yearToCategory') %></button>
+        <button class="sankey-tab" data-view="category-tag"><%= __('stats.categoryToTag') %></button>
+      </div>
+    </div>
+
+    <!-- 桑基图卡片 (仅在年份-分类或分类-标签下显示) -->
+    <div class="sankey-chart-card" id="sankey-chart-card" style="display: none;">
+      <div id="sankey-chart">
+        <div class="sankey-loader">
+          <i class="fas fa-spinner fa-spin"></i> <%= __('stats.loading') %>
+        </div>
+      </div>
+    </div>
+
+    <!-- 全部文章列表 (仅在“全部”标签下显示) -->
+    <div class="sankey-articles-section" id="sankey-articles-section">
+      <h3 class="articles-section-title">
+        <span class="title-text"><%= __('post.list') %></span>
+        <span class="articles-count-badge" id="sankey-articles-count"><%= __('post.count', 0) %></span>
+      </h3>
+      <div class="sankey-articles-list" id="sankey-articles-list">
+        <!-- 由 JavaScript 动态渲染 -->
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 引入桑基图控制脚本 -->
+<%- js('js/tag-sankey.js') %>

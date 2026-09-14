@@ -1,0 +1,51 @@
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- 字体 (霞鹜文楷 LXGW WenKai Webfont) -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.min.css" />
+  <!-- favicon -->
+  <%- favicon_tag(theme.favicon) %><%- css('css/style') %>
+
+  <!-- activeTitle -->
+  <% 
+    var activeTitle = page.title;
+    if (!activeTitle) {
+      if (page.category) {
+        activeTitle = page.category;
+      } else if (page.tag) {
+        activeTitle = page.tag;
+      } else if (page.archive) {
+        if (page.year) {
+          activeTitle = page.year + (page.month ? '-' + page.month : '');
+        } else {
+          activeTitle = __('menu.Archive');
+        }
+      } else {
+        activeTitle = __('activeTitle');
+      }
+    }
+  %>
+  <!-- inactiveTitle -->
+  <% var inactiveTitle = __('inactiveTitle'); %>
+
+  <title><%= activeTitle %></title>
+  <!-- 注入配置到全局变量 -->
+  <script>
+    window.SITE_CONFIG = {
+      root: '<%= config.root %>',
+      activeTitle: '<%= activeTitle %>',
+      inactiveTitle: '<%= inactiveTitle %>',
+      gsap: <%- JSON.stringify(theme.gsap || { enable: true, entrance_stagger: 0.08, scroll_trigger: true, parallax: true, hover_effect: true }) %>
+    };
+  </script>
+
+  <!-- 引入 GSAP 核心库及 ScrollTrigger 插件 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <!-- 加载JS文件 -->
+  <%- js(['js/head.js', 'js/iconfont.js','js/header.js']) %>
+</head>

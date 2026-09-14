@@ -1,0 +1,256 @@
+#header-container
+  position: fixed
+  width: 100%
+  top: 0
+  z-index: 1000
+  height:  4rem
+  padding: 1rem 2rem
+  box-sizing: border-box
+  display flex
+  justify-content space-between
+  align-items center
+  color: var(--text-color)
+  // 全面过渡效果，使高度变化、滑动隐藏/显示、背景切换和毛玻璃效果极其平稳
+  // 时长设为 0.4s，与 Swiper 收缩折叠动画时长及缓动曲线完全同步，实现完美统一
+  transition: height 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              background-color 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              backdrop-filter 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              -webkit-backdrop-filter 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              border-bottom 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.4s cubic-bezier(0.16, 1, 0.3, 1)
+
+  // 通过嵌套提升选择器优先级为 ID+Class (1-1-0)，优雅清除所有 !important 标记
+  &.header-top
+    height: 4rem
+    transform: translateY(0)
+    background-color: var(--header-bg-transparent)
+    // 使用极小初始值代替 none，保持 GPU 滤镜渲染管道激活，防止瞬间闪烁与掉帧
+    backdrop-filter: blur(0px) saturate(100%)
+    -webkit-backdrop-filter: blur(0px) saturate(100%)
+    box-shadow: none
+
+  &.header-normal,
+  &.header-mobile
+    height: 4rem
+    transform: translateY(0)
+    background-color: var(--header-bg)
+    backdrop-filter: blur(12px) saturate(180%)
+    -webkit-backdrop-filter: blur(12px) saturate(180%)
+    box-shadow: 0 4px 30px rgba(0, 0, 0, 0.03)
+
+  &.header-hidden
+    height: 4rem
+    transform: translateY(-100%)
+
+
+
+
+
+
+.logo
+  font-size 1.5rem
+  font-weight bold
+
+  a
+    text-decoration none
+    color var(--text-color)
+
+  img
+    max-height 40px
+    width auto
+
+.nav-menu
+  display flex
+  align-items center
+
+.nav-list
+  display flex
+  list-style none
+  margin 0
+  padding 0
+  gap 2rem
+
+  a
+    display inline-block
+    text-align center
+    width 4rem
+    text-decoration none
+    color var(--text-color)
+    line-height 2rem
+    font-size 1.2rem
+    font-weight bold
+    position relative
+    padding-bottom 4px
+
+    &::after
+      content ''
+      position absolute
+      bottom 0
+      left 0
+      width 0
+      height 2px
+      background-color var(--text-color)
+      transition width 0.3s ease
+
+    &:hover::after
+      width 100%
+
+    &.active::after
+      width 100%
+      background-color var(--text-color)
+
+.menu-toggle
+  display none
+  position relative
+  width 1.5rem
+  height 1.5rem
+  background none
+  border none
+  cursor pointer
+  padding 0
+  color var(--text-color)
+  z-index 1001
+
+  span.line
+    position absolute
+    left 0
+    width 100%
+    height 2px
+    background-color var(--text-color)
+    border-radius 2px
+    transition all 0.4s cubic-bezier(0.16, 1, 0.3, 1)
+
+    &.line-1
+      top 25%
+    &.line-2
+      top 50%
+      transform translateY(-50%)
+    &.line-3
+      top 75%
+      transform translateY(-100%)
+
+  &[aria-expanded="true"]
+    .line-1
+      top 50%
+      transform translateY(-50%) rotate(45deg)
+    .line-2
+      opacity 0
+      transform translateY(-50%) scale(0)
+    .line-3
+      top 50%
+      transform translateY(-50%) rotate(-45deg)
+
+// ==========================================
+// 三端自适应兼容设计 (手机、平板、电脑)
+// ==========================================
+
+// 1. 电脑端 (宽屏) 样式优化
+@media (min-width: 1025px)
+  #header-container
+    padding: 1rem 4rem // 大气宽屏内边距
+
+// 2. 平板端 样式优化 (防重叠拥挤)
+@media (min-width: 769px) and (max-width: 1024px)
+  #header-container
+    padding: 1rem 2.5rem
+  
+  .nav-list
+    gap 1.5rem // 减小间距以防挤压 Logo
+    
+    a
+      font-size 1.1rem
+      width 3.5rem
+
+// 3. 手机端 样式优化 (展开高斯模糊毛玻璃)
+@media (max-width: 768px)
+  #header-container
+    padding: 1rem 1.5rem
+  
+  .logo
+    font-size 1.3rem
+
+  .menu-toggle
+    display block
+
+  .nav-menu
+    position absolute
+    top 100%
+    left 0
+    right 0
+    height calc(100vh - 4rem)
+    opacity 0
+    visibility hidden
+    transform translateY(-10px)
+    transition opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+               transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
+               visibility 0.4s cubic-bezier(0.16, 1, 0.3, 1)
+    // 手机端菜单背景高斯模糊 (Glassmorphism)，质感统一
+    background: var(--mobile-menu-bg)
+    backdrop-filter: blur(20px) saturate(180%)
+    -webkit-backdrop-filter: blur(20px) saturate(180%)
+
+    &.active
+      opacity 1
+      visibility visible
+      transform translateY(0)
+
+  .nav-list
+    width 100%
+    height auto
+    flex-direction column
+    gap 0.75rem
+    padding 3rem 2rem
+
+    li
+      width 100%
+      list-style none
+
+    a
+      display flex
+      align-items center
+      justify-content center
+      width 100%
+      font-size 1.25rem
+      font-weight 600
+      text-align center
+      padding 0.8rem 1.5rem
+      border-radius 12px
+      transition all 0.3s cubic-bezier(0.16, 1, 0.3, 1)
+      color var(--text-color)
+      position relative
+
+      &::after
+        display none !important
+
+      // 移动端使用精致的圆角药丸悬停/轻触反馈背景
+      &:hover, &:active
+        background var(--shadow-color2)
+        transform translateY(-2px)
+        color var(--text-color)
+
+      &.active
+        background var(--shadow-color1)
+        color var(--text-color)
+        font-weight bold
+
+  // 菜单项波浪式渐现动效 (Staggered Entrance Animation)
+  @keyframes menuFadeIn
+    from
+      opacity 0
+      transform translateY(15px)
+    to
+      opacity 1
+      transform translateY(0)
+
+  .nav-menu.active
+    .nav-list li
+      animation menuFadeIn 0.5s cubic-bezier(0.16, 1, 0.3, 1) both
+      
+      for i in (1..8)
+        &:nth-child({i})
+          animation-delay (0.05s * i)
+
+
+
+
